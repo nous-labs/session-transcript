@@ -1,0 +1,36 @@
+{
+  "name": "@nous-labs/session-transcript",
+  "version": "0.1.0",
+  "description": "Session transcript writer + smart tail injection for AI coding assistants.",
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "build": "bun build src/index.ts --outdir dist --target node && tsc --emitDeclarationOnly",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit"
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "keywords": [
+    "opencode",
+    "oh-my-opencode",
+    "session",
+    "transcript",
+    "compaction",
+    "context"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "@types/bun": "latest"
+  }
+}
