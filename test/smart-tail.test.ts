@@ -46,11 +46,19 @@ describe("generateSmartTail", () => {
       expect(result.classification).toBe("active-work")
     })
 
-    it("#then injects last user + assistant + todos", () => {
+    it("#then injects classification header with directive", () => {
       const result = generateSmartTail(state)
       expect(result.inject).toBe(true)
+      expect(result.content).toContain("COMPACTION INTERRUPTED ACTIVE WORK")
+      expect(result.content).toContain("Action required:")
+      expect(result.content).toContain("Resume from where you left off")
+    })
+
+    it("#then injects last user + assistant + todos", () => {
+      const result = generateSmartTail(state)
       expect(result.content).toContain("Implement auth, then add tests")
       expect(result.content).toContain("Auth implemented")
+      expect(result.content).toContain("Your prepared response (present this):")
       expect(result.content).toContain("Add tests")
       expect(result.content).toContain("pending")
     })
@@ -85,9 +93,11 @@ describe("generateSmartTail", () => {
       expect(result.classification).toBe("mid-tool")
     })
 
-    it("#then includes tools in flight", () => {
+    it("#then includes classification header and tools in flight", () => {
       const result = generateSmartTail(state)
       expect(result.inject).toBe(true)
+      expect(result.content).toContain("COMPACTION INTERRUPTED MID-EXECUTION")
+      expect(result.content).toContain("Review what was in flight")
       expect(result.content).toContain("Tools in flight")
       expect(result.content).toContain("Edit")
     })

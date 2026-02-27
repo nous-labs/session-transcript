@@ -54,12 +54,27 @@ function formatTodos(todos: TranscriptTodo[]): string {
 }
 
 /**
+ * Classification-aware headers that instruct the post-compaction agent.
+ * The agent reads text — if the text says what to do, it will do it.
+ */
+const CLASSIFICATION_HEADERS: Record<Exclude<TailClassification, "clean-end">, { title: string; instruction: string }> = {
+  "active-work": {
+    title: "COMPACTION INTERRUPTED ACTIVE WORK",
+    instruction: "You were mid-task when compaction hit. Resume from where you left off. If you had findings ready, present them to the user NOW.",
+  },
+  "mid-tool": {
+    title: "COMPACTION INTERRUPTED MID-EXECUTION",
+    instruction: "You were in the middle of executing tools when compaction hit. Review what was in flight and resume or re-run as needed.",
+  },
+}
+
+/**
  * Classify session state and generate smart tail for post-compaction injection.
  *
  * Rule-based classification (zero LLM calls):
  * - clean-end: No active todos → inject nothing
- * - active-work: Active todos → inject last user+assistant + todo list (~800 tokens)
- * - mid-tool: Tool calls in flight → inject above + tool context (~1200 tokens)
+ * - active-work: Active todos → inject directive + last user+assistant + todo list (~800 tokens)
+ * - mid-tool: Tool calls in flight → inject directive + above + tool context (~1200 tokens)
  */
 export function generateSmartTail(
   state: SessionState,
@@ -78,8 +93,10 @@ export function generateSmartTail(
     }
   }
 
+  const header = CLASSIFICATION_HEADERS[classification]
   const lines: string[] = []
-  lines.push(`### Recent Conversation Tail (auto-recovered)`)
+  lines.push(`### ${header.title}`)
+  lines.push(`**Action required:** ${header.instruction}`)
   lines.push(``)
 
   const lastUser = findLastUser(state.messages)
@@ -92,7 +109,7 @@ export function generateSmartTail(
   const lastAssistant = findLastAssistant(state.messages)
   if (lastAssistant) {
     const condensed = lastAssistant.content.trim().slice(0, 1600)
-    lines.push(`**Last assistant action:** ${condensed}`)
+    lines.push(`**Your prepared response (present this):** ${condensed}`)
     lines.push(``)
   }
 
