@@ -4,16 +4,21 @@ Session transcript persistence for AI coding assistants. Markdown-formatted conv
 
 ## Installation
 
+Clone the repository:
+
 ```bash
-bun add @nous-labs/session-transcript
-# or
-npm install @nous-labs/session-transcript
+git clone https://github.com/nous-labs/session-transcript.git
 ```
 
-## Requirements
+Add as a local dependency in your project's `package.json`. Note: the local directory may be named `nous-session-transcript` but the cloned repo will be `session-transcript`.
 
-- Bun or Node.js
-- TypeScript
+```json
+{
+  "dependencies": {
+    "@nous-labs/session-transcript": "file:../session-transcript"
+  }
+}
+```
 
 ## Features
 
@@ -95,21 +100,20 @@ interface TranscriptMessage {
   agent?: string;
   model?: string;
   tools?: TranscriptToolCall[];
-  timestamp?: Date;
+  timestamp?: number;
 }
 
 interface TranscriptToolCall {
   name: string;
-  arguments: Record<string, unknown>;
-  result?: unknown;
+  status?: 'running' | 'completed' | 'error';
+  input?: string;
   error?: string;
 }
 
 interface TranscriptTodo {
-  id: string;
   content: string;
-  status: 'pending' | 'in_progress' | 'completed';
-  priority?: 'low' | 'medium' | 'high';
+  status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
+  priority?: string;
 }
 
 interface TranscriptOptions {
@@ -120,10 +124,9 @@ interface TranscriptOptions {
 }
 
 interface SessionState {
-  id: string;
   messages: TranscriptMessage[];
-  todos?: TranscriptTodo[];
-  metadata?: Record<string, unknown>;
+  todos: TranscriptTodo[];
+  sessionID: string;
 }
 
 interface SmartTailResult {
